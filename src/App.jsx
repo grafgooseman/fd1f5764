@@ -1,17 +1,23 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import Header from './components/Header';
+import Navigation from './components/Navigation';
+import ActivityFeed from './components/activities/ActivityFeed';
+import { ActivityProvider } from './context/ActivityContext';
 
-import Header from './Header.jsx';
+console.log('App component loaded');
 
 const App = () => {
   return (
-    <div className='container'>
-      <Header/>
-      <div className="container-view">Some activities should be here</div>
-    </div>
+    <ActivityProvider>
+      <div className="container mx-auto max-w-md h-[666px] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col">
+        <Header />
+        <main className="flex-1 overflow-y-auto">
+          <ActivityFeed />
+        </main>
+        <Navigation />
+      </div>
+    </ActivityProvider>
   );
 };
-
-ReactDOM.render(<App/>, document.getElementById('app'));
 
 export default App;
