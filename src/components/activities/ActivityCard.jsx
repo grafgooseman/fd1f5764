@@ -1,12 +1,15 @@
-import React from 'react';
-import { PhoneIncoming, PhoneOutgoing, PhoneMissed } from 'react-feather';
+import React, { useState } from 'react';
+import { PhoneIncoming, PhoneOutgoing, PhoneMissed, Archive } from 'react-feather';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const ActivityCard = ({ activity }) => {
-  const getCallIcon = () => {
-    if (activity.call_type === 'missed') {
+const ActivityCard = ({ activity, isGrouped, isFirst, isLast, groupSize, group = [] }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const getCallIcon = (callType, direction) => {
+    if (callType === 'missed') {
       return <PhoneMissed className="w-5 h-5 text-red-500" />;
     }
-    return activity.direction === 'inbound' 
+    return direction === 'inbound' 
       ? <PhoneIncoming className="w-5 h-5 text-primary" />
       : <PhoneOutgoing className="w-5 h-5 text-blue-500" />;
   };
@@ -19,29 +22,118 @@ const ActivityCard = ({ activity }) => {
     });
   };
 
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const formatDuration = (seconds) => {
+    return `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`;
+  };
+
   return (
-    <div className="bg-white p-4 border-b border-gray-100 hover:bg-gray-50 transition-all duration-200 ease-in-out transform hover:scale-[1.02]">
-      <div className="flex items-center space-x-4">
-        <div className="flex-shrink-0">
-          {getCallIcon()}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 truncate">
-            {activity.from || 'Unknown'}
-          </p>
-          <p className="text-sm text-gray-500 truncate">
-            via {activity.via}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm text-gray-500">
-            {formatTime(activity.created_at)}
-          </p>
-          <p className="text-sm text-gray-400">
-            {Math.floor(activity.duration / 60)}:{(activity.duration % 60).toString().padStart(2, '0')}
-          </p>
+    <div className="relative">
+      <div 
+        onClick={() => setIsExpanded(!isExpanded)}
+        className={`
+          bg-white p-4 border-b border-gray-100 
+          hover:bg-gray-50 transition-all duration-200 ease-in-out cursor-pointer
+          ${isExpanded ? 'bg-gray-50' : ''}
+          ${isFirst ? 'rounded-t-lg' : ''}
+          ${isLast && !isExpanded ? 'rounded-b-lg border-b-0' : ''}
+        `}
+      >
+        <div className="flex items-center space-x-4">
+          <div className="flex-shrink-0">
+            {getCallIcon(activity.call_type, activity.direction)}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center space-x-2">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {activity.from || 'Unknown'}
+                {isGrouped && groupSize > 1 && (
+                  <span className="ml-2 inline-flex items-center justify-center bg-red-500 rounded-full w-4 h-4 text-[10px] font-medium text-white">
+                    {groupSize}
+                  </span>
+                )}
+              </p>
+            </div>
+            <p className="text-sm text-gray-500 truncate">
+              via {activity.via}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-gray-500">
+              {formatTime(activity.created_at)}
+            </p>
+            <p className="text-sm text-gray-400">
+              {formatDuration(activity.duration)}
+            </p>
+          </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="border-b border-gray-100 bg-gray-50"
+          >
+            <div className="p-4 space-y-4">
+              {/* Details for the main call */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-gray-900">Call Details</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <p className="text-gray-500">Date:</p>
+                  <p className="text-gray-900">{formatDate(activity.created_at)}</p>
+                  <p className="text-gray-500">Time:</p>
+                  <p className="text-gray-900">{formatTime(activity.created_at)}</p>
+                  <p className="text-gray-500">Duration:</p>
+                  <p className="text-gray-900">{formatDuration(activity.duration)}</p>
+                  <p className="text-gray-500">Direction:</p>
+                  <p className="text-gray-900 capitalize">{activity.direction}</p>
+                  <p className="text-gray-500">Via:</p>
+                  <p className="text-gray-900">{activity.via}</p>
+                </div>
+              </div>
+
+              {/* Show grouped calls if any */}
+              {isGrouped && group.length > 1 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-gray-900">Related Calls</h3>
+                  <div className="space-y-2">
+                    {group.slice(1).map((call) => (
+                      <div key={call.id} className="flex justify-between text-sm border-t border-gray-100 pt-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="flex-shrink-0">
+                            {getCallIcon(call.call_type, call.direction)}
+                          </div>
+                          <span className="text-gray-900">{formatTime(call.created_at)}</span>
+                        </div>
+                        <span className="text-gray-500">{formatDuration(call.duration)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Archive button */}
+              <button 
+                className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              >
+                <Archive className="w-4 h-4" />
+                <span>Archive Call</span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
