@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { PhoneIncoming, PhoneOutgoing, PhoneMissed, Archive } from 'react-feather';
-import { motion, AnimatePresence } from 'framer-motion';
+import { PhoneIncoming, PhoneOutgoing, PhoneMissed, Archive, RotateCcw } from 'react-feather';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useActivities } from '../../context/ActivityContext';
 import { ANIMATION_DURATION } from '../../constants/animations';
 
@@ -144,6 +144,18 @@ const ActivityCard = ({
     }
   };
 
+  const x = useMotionValue(0);
+  const cardOpacity = useTransform(x, [-100, 0], [0.3, 1]);
+  const buttonOpacity = useTransform(x, [-100, -50], [1, 0]);
+  
+  const handleDragEnd = async (event, info) => {
+    if (info.offset.x < -100) {
+      // Create a synthetic event object to prevent errors
+      const syntheticEvent = { stopPropagation: () => {} };
+      handleArchiveAction(syntheticEvent);
+    }
+  };
+
   return (
     <motion.div
       className="relative"
@@ -158,23 +170,50 @@ const ActivityCard = ({
         height: { duration: ANIMATION_DURATION * 0.5 }
       }}
     >
+      {/* Archive button background */}
+      <motion.div 
+        className={`
+          absolute inset-0 flex items-center justify-end px-8
+          bg-theme-light-bg-secondary dark:bg-theme-dark-bg-secondary
+        `}
+        style={{ opacity: buttonOpacity }}
+      >
+        <div className="flex items-center text-theme-light-text-primary dark:text-theme-dark-text-primary">
+          {activity.is_archived ? (
+            <>
+              <RotateCcw className="w-6 h-6 mr-2" />
+              <span className="text-sm font-medium">Unarchive</span>
+            </>
+          ) : (
+            <>
+              <Archive className="w-6 h-6 mr-2" />
+              <span className="text-sm font-medium">Archive</span>
+            </>
+          )}
+        </div>
+      </motion.div>
+
+      {/* Card content */}
       <motion.div
-        animate={{
-          opacity: isDisintegrating ? 0 : 1,
-          scale: isDisintegrating ? 0.8 : 1,
-        }}
-        transition={{ duration: ANIMATION_DURATION }}
+        style={{ x, opacity: cardOpacity }}
+        drag={feedType !== 'all' ? "x" : false}
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.7}
+        onDragEnd={handleDragEnd}
+        className={`
+          relative bg-theme-light-bg-primary dark:bg-theme-dark-bg-primary
+          ${isFirst ? 'rounded-t-lg' : ''}
+          ${isLast ? 'rounded-b-lg' : ''}
+        `}
       >
         <div 
           onClick={handleClick}
           className={`
-            bg-theme-light-bg-primary dark:bg-theme-dark-bg-primary p-4 
+            p-4 
             border-b border-theme-light-border-primary dark:border-theme-dark-border-primary 
             hover:bg-theme-light-bg-secondary dark:hover:bg-theme-dark-bg-secondary 
             transition-all duration-200 ease-in-out cursor-pointer
             ${isExpanded ? 'bg-theme-light-bg-secondary dark:bg-theme-dark-bg-secondary' : ''}
-            ${isFirst ? 'rounded-t-lg' : ''}
-            ${isLast ? 'rounded-b-lg border-b-0' : ''}
           `}
         >
           <div className="flex items-center space-x-4">
