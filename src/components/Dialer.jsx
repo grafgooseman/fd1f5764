@@ -3,7 +3,7 @@ import { PhoneIcon, BackspaceIcon } from '@heroicons/react/24/outline';
 
 const DialerButton = ({ children, className = '' }) => (
   <button className={`
-    w-14 h-14 rounded-full 
+    w-20 h-16 rounded-full 
     flex items-center justify-center
     text-2xl font-medium
     bg-theme-light-bg-secondary dark:bg-theme-dark-bg-secondary
@@ -18,7 +18,7 @@ const DialerButton = ({ children, className = '' }) => (
 
 const Dialer = () => {
   return (
-    <div className="p-4 flex flex-col items-center h-full">
+    <div className="p-8 flex flex-col items-center h-full">
       <div className="w-full max-w-md space-y-6">
         {/* Phone number display */}
         <input
@@ -51,8 +51,8 @@ const Dialer = () => {
         {/* Action buttons */}
         <div className="relative h-14">
           {/* Delete button - positioned left */}
-          <button className="absolute left-0 
-            w-14 h-14 rounded-full 
+          <button className="absolute left-5 
+            w-20 h-16 rounded-full 
             flex items-center justify-center
             bg-theme-light-bg-secondary dark:bg-theme-dark-bg-secondary
             text-theme-light-text-primary dark:text-theme-dark-text-primary
@@ -63,7 +63,7 @@ const Dialer = () => {
           
           {/* Call button - centered */}
           <button className="absolute left-1/2 -translate-x-1/2
-            w-14 h-14 rounded-full 
+            w-16 h-16 rounded-full 
             flex items-center justify-center
             bg-primary hover:bg-primary-dark
             transition-colors">
