@@ -86,6 +86,13 @@ const ActivityCard = ({
   };
 
   const handleClick = () => {
+    console.log('Card clicked:', {
+      id: activity.id,
+      from: activity.from,
+      isGrouped,
+      groupKey
+    });
+    
     if (isGrouped) {
       onUnstack(groupKey);
     } else {
@@ -95,6 +102,14 @@ const ActivityCard = ({
 
   const handleArchiveAction = async (e) => {
     e.stopPropagation();
+    console.log('Archive button clicked:', {
+      id: activity.id,
+      from: activity.from,
+      isGrouped,
+      groupKey,
+      isArchived: activity.is_archived
+    });
+    
     setIsDisintegrating(true);
     createParticles();
 
@@ -105,6 +120,7 @@ const ActivityCard = ({
     
     try {
       if (isGrouped && group) {
+        console.log('Archiving group:', group.map(call => call.id));
         // Archive/unarchive all calls in the group
         const promises = group.map(call => {
           if (activity.is_archived) {
@@ -115,6 +131,7 @@ const ActivityCard = ({
         });
         await Promise.all(promises);
       } else {
+        console.log('Archiving single call:', activity.id);
         // Single call archive/unarchive
         if (activity.is_archived) {
           await unarchiveCall(activity.id);

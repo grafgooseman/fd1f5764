@@ -5,3 +5,12 @@
 body {
   @apply bg-secondary font-sans text-gray-800;
 } 
+
+* {
+  -ms-overflow-style: none; 
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
