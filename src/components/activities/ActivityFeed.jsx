@@ -4,6 +4,7 @@ import { useActivities } from '../../context/ActivityContext';
 import ActivityCard from './ActivityCard';
 import { ChevronUp, Archive, RefreshCw } from 'react-feather';
 import { ANIMATION_DURATION } from '../../constants/animations';
+import { v4 as uuidv4 } from 'uuid';
 
 const ActivityFeed = ({ feedType }) => {
   const { 
@@ -54,25 +55,23 @@ const ActivityFeed = ({ feedType }) => {
       return [];
     }
 
-    // First filter activities based on feedType
     const filteredActivities = activities.filter(activity => {
       if (feedType === 'archive') return activity.is_archived;
       if (feedType === 'calls') return !activity.is_archived;
-      return true; // 'all' shows everything
+      return true;
     });
 
-    // If no activities match the filter, return empty array
     if (filteredActivities.length === 0) {
       return [];
     }
 
-    // Sort filtered activities by date
     const sortedActivities = [...filteredActivities].sort((a, b) => 
       new Date(b.created_at) - new Date(a.created_at)
     );
 
     const groups = [];
     let currentGroup = [];
+    let currentGroupId = uuidv4();
 
     sortedActivities.forEach((activity) => {
       if (currentGroup.length === 0) {
@@ -81,24 +80,22 @@ const ActivityFeed = ({ feedType }) => {
         const lastCall = currentGroup[currentGroup.length - 1];
         const timeDiff = Math.abs(
           new Date(lastCall.created_at) - new Date(activity.created_at)
-        ) / (1000 * 60); // Convert to minutes
+        ) / (1000 * 60);
 
-        if (
-          timeDiff <= 20 && 
-          lastCall.from === activity.from
-        ) {
+        if (timeDiff <= 20 && lastCall.from === activity.from) {
           currentGroup.push(activity);
         } else {
           if (currentGroup.length > 0) {
-            groups.push([...currentGroup]);
+            groups.push({ id: currentGroupId, calls: [...currentGroup] });
           }
           currentGroup = [activity];
+          currentGroupId = uuidv4();
         }
       }
     });
 
     if (currentGroup.length > 0) {
-      groups.push(currentGroup);
+      groups.push({ id: currentGroupId, calls: currentGroup });
     }
 
     return groups;
@@ -106,7 +103,7 @@ const ActivityFeed = ({ feedType }) => {
 
   const groupByDate = (groups) => {
     return groups.reduce((acc, group) => {
-      const date = new Date(group[0].created_at).toLocaleDateString('en-US', {
+      const date = new Date(group.calls[0].created_at).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
@@ -179,13 +176,13 @@ const ActivityFeed = ({ feedType }) => {
           </div>
           <AnimatePresence mode="popLayout">
             {groupedByDate[date].map((group, groupIndex) => {
-              const groupKey = `${date}-${groupIndex}`;
+              const groupKey = `${date}-${group.id}`;
               const isUnstacked = unStackedGroups.has(groupKey);
 
               if (isUnstacked) {
                 return (
                   <motion.div 
-                    key={groupKey} 
+                    key={groupKey}
                     className="relative"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -202,9 +199,9 @@ const ActivityFeed = ({ feedType }) => {
                       </button>
                     </div>
                     <div className="pl-9">
-                      {group.map((call, callIndex) => (
+                      {group.calls.map((call, callIndex) => (
                         <motion.div
-                          key={call.id}
+                          key={`${groupKey}-${call.id}`}
                           layout
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
@@ -213,8 +210,9 @@ const ActivityFeed = ({ feedType }) => {
                             activity={call}
                             isGrouped={false}
                             isFirst={groupIndex === 0 && callIndex === 0}
-                            isLast={groupIndex === groupedByDate[date].length - 1 && callIndex === group.length - 1}
+                            isLast={groupIndex === groupedByDate[date].length - 1 && callIndex === group.calls.length - 1}
                             feedType={feedType}
+                            groupId={group.id}
                           />
                         </motion.div>
                       ))}
@@ -235,16 +233,17 @@ const ActivityFeed = ({ feedType }) => {
                   layout
                 >
                   <ActivityCard 
-                    activity={group[0]}
-                    isGrouped={group.length > 1}
+                    activity={group.calls[0]}
+                    isGrouped={group.calls.length > 1}
                     isFirst={groupIndex === 0}
                     isLast={groupIndex === groupedByDate[date].length - 1}
-                    groupSize={group.length}
-                    group={group}
+                    groupSize={group.calls.length}
+                    group={group.calls}
                     onUnstack={() => {
                       setUnStackedGroups(prev => new Set([...prev, groupKey]));
                     }}
                     groupKey={groupKey}
+                    groupId={group.id}
                     feedType={feedType}
                   />
                 </motion.div>
