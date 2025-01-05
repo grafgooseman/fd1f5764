@@ -143,29 +143,31 @@ const ActivityFeed = ({ feedType }) => {
 
   return (
     <div className="divide-y divide-theme-light-border-primary dark:divide-theme-dark-border-primary">
-      <div className="px-4 pt-4">
-        <button
-          onClick={feedType === 'calls' ? archiveAllCalls : resetAllCalls}
-          className="w-full flex items-center justify-center space-x-2 px-4 py-2 mb-4 text-sm font-medium 
-            text-theme-light-text-primary dark:text-theme-dark-text-primary 
-            bg-theme-light-bg-primary dark:bg-theme-dark-bg-primary 
-            border border-theme-light-border-secondary dark:border-theme-dark-border-secondary 
-            rounded-md hover:bg-theme-light-bg-secondary dark:hover:bg-theme-dark-bg-secondary 
-            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-sm"
-          >
-            {feedType === 'calls' ? (
-              <>
-                <Archive className="w-4 h-4" />
-                <span>Archive All Calls</span>
-              </>
-            ) : (
-              <>
-                <RefreshCw className="w-4 h-4" />
-                <span>Unarchive All Calls</span>
-              </>
-            )}
-          </button>
-      </div>
+      {feedType !== 'all' && (
+        <div className="px-4 pt-4">
+          <button
+            onClick={feedType === 'calls' ? archiveAllCalls : resetAllCalls}
+            className="w-full flex items-center justify-center space-x-2 px-4 py-2 mb-4 text-sm font-medium 
+              text-theme-light-text-primary dark:text-theme-dark-text-primary 
+              bg-theme-light-bg-primary dark:bg-theme-dark-bg-primary 
+              border border-theme-light-border-secondary dark:border-theme-dark-border-secondary 
+              rounded-md hover:bg-theme-light-bg-secondary dark:hover:bg-theme-dark-bg-secondary 
+              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-sm"
+            >
+              {feedType === 'calls' ? (
+                <>
+                  <Archive className="w-4 h-4" />
+                  <span>Archive All Calls</span>
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Unarchive All Calls</span>
+                </>
+              )}
+            </button>
+        </div>
+      )}
       {sortedDates.map((date) => (
         <div key={date}>
           <div className="bg-theme-light-bg-secondary dark:bg-theme-dark-bg-secondary px-4 py-2 text-xs text-theme-light-text-tertiary dark:text-theme-dark-text-tertiary uppercase tracking-wider">

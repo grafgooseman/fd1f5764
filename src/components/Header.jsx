@@ -22,6 +22,10 @@ const Header = ({ currentView }) => {
         return 'Archived';
       case 'all':
         return 'All Calls';
+      case 'dialer':
+        return 'New Call';
+      case 'profile':
+        return 'Profile';
       default:
         return 'Inbox';
     }
