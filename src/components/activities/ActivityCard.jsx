@@ -25,9 +25,10 @@ const ActivityCard = ({
   groupSize, 
   onUnstack,
   groupKey,
-  feedType 
+  feedType,
+  group 
 }) => {
-  const { archiveCall, unarchiveCall } = useActivities();
+  const { archiveCall, unarchiveCall, fetchActivities } = useActivities();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDisintegrating, setIsDisintegrating] = useState(false);
   const [particles, setParticles] = useState([]);
@@ -102,11 +103,27 @@ const ActivityCard = ({
     
     setIsRemoving(true);
     
-    // Perform the archive/unarchive action
-    if (activity.is_archived) {
-      await unarchiveCall(activity.id);
-    } else {
-      await archiveCall(activity.id);
+    try {
+      if (isGrouped && group) {
+        // Archive/unarchive all calls in the group
+        const promises = group.map(call => {
+          if (activity.is_archived) {
+            return unarchiveCall(call.id);
+          } else {
+            return archiveCall(call.id);
+          }
+        });
+        await Promise.all(promises);
+      } else {
+        // Single call archive/unarchive
+        if (activity.is_archived) {
+          await unarchiveCall(activity.id);
+        } else {
+          await archiveCall(activity.id);
+        }
+      }
+    } catch (error) {
+      console.error('Error handling archive action:', error);
     }
   };
 

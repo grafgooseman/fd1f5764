@@ -15,10 +15,34 @@ const ActivityFeed = ({ feedType }) => {
     resetAllCalls 
   } = useActivities();
   const [unStackedGroups, setUnStackedGroups] = useState(new Set());
+  const [groupedByDate, setGroupedByDate] = useState({});
+  const [sortedDates, setSortedDates] = useState([]);
 
+  // Recalculate groups and dates whenever activities or feedType changes
+  useEffect(() => {
+    const recalculateGroups = () => {
+      const groupedCalls = groupCallsByTimeAndNumber(activities);
+      const grouped = groupByDate(groupedCalls);
+      
+      // Filter out dates with no activities
+      const filteredGrouped = Object.fromEntries(
+        Object.entries(grouped).filter(([_, groups]) => groups.length > 0)
+      );
+      
+      setGroupedByDate(filteredGrouped);
+      setSortedDates(
+        Object.keys(filteredGrouped)
+          .sort((a, b) => new Date(b) - new Date(a))
+      );
+    };
+
+    recalculateGroups();
+  }, [activities, feedType]);
+
+  // Only fetch activities once on mount
   useEffect(() => {
     fetchActivities();
-  }, [fetchActivities]);
+  }, []);
 
   // Reset unstacked groups when activities change
   useEffect(() => {
@@ -30,8 +54,20 @@ const ActivityFeed = ({ feedType }) => {
       return [];
     }
 
-    // Sort activities by date first
-    const sortedActivities = [...activities].sort((a, b) => 
+    // First filter activities based on feedType
+    const filteredActivities = activities.filter(activity => {
+      if (feedType === 'archive') return activity.is_archived;
+      if (feedType === 'calls') return !activity.is_archived;
+      return true; // 'all' shows everything
+    });
+
+    // If no activities match the filter, return empty array
+    if (filteredActivities.length === 0) {
+      return [];
+    }
+
+    // Sort filtered activities by date
+    const sortedActivities = [...filteredActivities].sort((a, b) => 
       new Date(b.created_at) - new Date(a.created_at)
     );
 
@@ -39,11 +75,6 @@ const ActivityFeed = ({ feedType }) => {
     let currentGroup = [];
 
     sortedActivities.forEach((activity) => {
-      // Filter based on feedType
-      if (feedType === 'archive' && !activity.is_archived) return;
-      if (feedType === 'calls' && activity.is_archived) return;
-      // 'all' shows everything, so no filtering needed
-
       if (currentGroup.length === 0) {
         currentGroup.push(activity);
       } else {
@@ -135,12 +166,6 @@ const ActivityFeed = ({ feedType }) => {
       </div>
     );
   }
-
-  const groupedCalls = groupCallsByTimeAndNumber(activities);
-  const groupedByDate = groupByDate(groupedCalls);
-  const sortedDates = Object.keys(groupedByDate).sort((a, b) => 
-    new Date(b) - new Date(a)
-  );
 
   return (
     <div className="divide-y divide-gray-100">
