@@ -27,7 +27,7 @@ const ActivityCard = ({
   onUnstack,
   groupKey 
 }) => {
-  const { archiveCall } = useActivities();
+  const { archiveCall, unarchiveCall } = useActivities();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDisintegrating, setIsDisintegrating] = useState(false);
   const [particles, setParticles] = useState([]);
@@ -91,14 +91,18 @@ const ActivityCard = ({
     }
   };
 
-  const handleArchive = (e) => {
+  const handleArchiveAction = (e) => {
     e.stopPropagation();
     setIsExpanded(false);
     setIsDisintegrating(true);
     createParticles();
     
-    // Archive immediately, the UI will handle the transition
-    archiveCall(activity.id);
+    // Call appropriate function based on current archive status
+    if (activity.is_archived) {
+      unarchiveCall(activity.id);
+    } else {
+      archiveCall(activity.id);
+    }
   };
 
   return (
@@ -157,7 +161,7 @@ const ActivityCard = ({
       </motion.div>
 
       <AnimatePresence>
-        {!isGrouped && isExpanded && !activity.is_archived && (
+        {!isGrouped && isExpanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -205,7 +209,7 @@ const ActivityCard = ({
 
               {/* Archive button */}
               <button 
-                onClick={handleArchive}
+                onClick={handleArchiveAction}
                 className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               >
                 <Archive className="w-4 h-4" />

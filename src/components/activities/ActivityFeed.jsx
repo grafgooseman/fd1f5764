@@ -4,7 +4,7 @@ import { useActivities } from '../../context/ActivityContext';
 import ActivityCard from './ActivityCard';
 import { ChevronUp } from 'react-feather';
 
-const ActivityFeed = ({ showAll = false }) => {
+const ActivityFeed = ({ feedType }) => {
   const { activities, loading, error, fetchActivities } = useActivities();
   const [unStackedGroups, setUnStackedGroups] = useState(new Set());
 
@@ -31,7 +31,10 @@ const ActivityFeed = ({ showAll = false }) => {
     let currentGroup = [];
 
     sortedActivities.forEach((activity) => {
-      if (!showAll && activity.is_archived) return;
+      // Filter based on feedType
+      if (feedType === 'archive' && !activity.is_archived) return;
+      if (feedType === 'calls' && activity.is_archived) return;
+      // 'all' shows everything, so no filtering needed
 
       if (currentGroup.length === 0) {
         currentGroup.push(activity);
@@ -43,8 +46,7 @@ const ActivityFeed = ({ showAll = false }) => {
 
         if (
           timeDiff <= 20 && 
-          lastCall.from === activity.from &&
-          !lastCall.is_archived
+          lastCall.from === activity.from
         ) {
           currentGroup.push(activity);
         } else {
@@ -187,7 +189,11 @@ const ActivityFeed = ({ showAll = false }) => {
       </AnimatePresence>
       {sortedDates.length === 0 && (
         <div className="text-center py-10 text-gray-500">
-          No calls to display
+          {feedType === 'archive' 
+            ? 'No archived calls to display' 
+            : feedType === 'all'
+            ? 'No calls to display'
+            : 'No active calls to display'}
         </div>
       )}
     </div>
