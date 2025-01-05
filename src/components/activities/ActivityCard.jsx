@@ -1,6 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PhoneIncoming, PhoneOutgoing, PhoneMissed, Archive } from 'react-feather';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useActivities } from '../../context/ActivityContext';
+
+const ANIMATION_DURATION = 0.5; // Define duration in seconds
+
+const DisintegrationParticle = ({ x, y }) => (
+  <motion.div
+    className="absolute w-1 h-1 bg-gray-400 rounded-full"
+    initial={{ x, y, opacity: 1 }}
+    animate={{
+      x: x + (Math.random() - 0.5) * 100,
+      y: y + (Math.random() - 0.5) * 100,
+      opacity: 0
+    }}
+    transition={{ duration: ANIMATION_DURATION, ease: "easeOut" }}
+  />
+);
 
 const ActivityCard = ({ 
   activity, 
@@ -11,7 +27,32 @@ const ActivityCard = ({
   onUnstack,
   groupKey 
 }) => {
+  const { archiveCall } = useActivities();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isDisintegrating, setIsDisintegrating] = useState(false);
+  const [particles, setParticles] = useState([]);
+
+  const createParticles = () => {
+    const numParticles = 50;
+    const newParticles = [];
+    
+    for (let i = 0; i < numParticles; i++) {
+      newParticles.push({
+        id: i,
+        x: Math.random() * 300,
+        y: Math.random() * 100
+      });
+    }
+    
+    setParticles(newParticles);
+  };
+
+  // Close expanded view when archived
+  useEffect(() => {
+    if (activity.is_archived) {
+      setIsExpanded(false);
+    }
+  }, [activity.is_archived]);
 
   const getCallIcon = (callType, direction) => {
     if (callType === 'missed') {
@@ -50,50 +91,73 @@ const ActivityCard = ({
     }
   };
 
+  const handleArchive = (e) => {
+    e.stopPropagation();
+    setIsExpanded(false);
+    setIsDisintegrating(true);
+    createParticles();
+    
+    // Archive immediately, the UI will handle the transition
+    archiveCall(activity.id);
+  };
+
   return (
-    <div className="relative">
-      <div 
-        onClick={handleClick}
-        className={`
-          bg-white p-4 border-b border-gray-100 
-          hover:bg-gray-50 transition-all duration-200 ease-in-out cursor-pointer
-          ${isExpanded ? 'bg-gray-50' : ''}
-          ${isFirst ? 'rounded-t-lg' : ''}
-          ${isLast ? 'rounded-b-lg border-b-0' : ''}
-        `}
+    <motion.div 
+      className="relative"
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: ANIMATION_DURATION }}
+    >
+      <motion.div
+        animate={{
+          opacity: isDisintegrating ? 0 : 1,
+          scale: isDisintegrating ? 0.8 : 1,
+        }}
+        transition={{ duration: ANIMATION_DURATION }}
       >
-        <div className="flex items-center space-x-4">
-          <div className="flex-shrink-0">
-            {getCallIcon(activity.call_type, activity.direction)}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {activity.from || 'Unknown'}
-                {isGrouped && groupSize > 1 && (
-                  <span className="ml-2 inline-flex items-center justify-center bg-red-500 rounded-full w-4 h-4 text-[10px] font-medium text-white">
-                    {groupSize}
-                  </span>
-                )}
+        <div 
+          onClick={handleClick}
+          className={`
+            bg-white p-4 border-b border-gray-100 
+            hover:bg-gray-50 transition-all duration-200 ease-in-out cursor-pointer
+            ${isExpanded ? 'bg-gray-50' : ''}
+            ${isFirst ? 'rounded-t-lg' : ''}
+            ${isLast ? 'rounded-b-lg border-b-0' : ''}
+          `}
+        >
+          <div className="flex items-center space-x-4">
+            <div className="flex-shrink-0">
+              {getCallIcon(activity.call_type, activity.direction)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-2">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {activity.from || 'Unknown'}
+                  {isGrouped && groupSize > 1 && (
+                    <span className="ml-2 inline-flex items-center justify-center bg-red-500 rounded-full w-4 h-4 text-[10px] font-medium text-white">
+                      {groupSize}
+                    </span>
+                  )}
+                </p>
+              </div>
+              <p className="text-sm text-gray-500 truncate">
+                via {activity.via}
               </p>
             </div>
-            <p className="text-sm text-gray-500 truncate">
-              via {activity.via}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-500">
-              {formatTime(activity.created_at)}
-            </p>
-            <p className="text-sm text-gray-400">
-              {formatDuration(activity.duration)}
-            </p>
+            <div className="text-right">
+              <p className="text-sm text-gray-500">
+                {formatTime(activity.created_at)}
+              </p>
+              <p className="text-sm text-gray-400">
+                {formatDuration(activity.duration)}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <AnimatePresence>
-        {!isGrouped && isExpanded && (
+        {!isGrouped && isExpanded && !activity.is_archived && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -141,16 +205,29 @@ const ActivityCard = ({
 
               {/* Archive button */}
               <button 
+                onClick={handleArchive}
                 className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               >
                 <Archive className="w-4 h-4" />
-                <span>Archive Call</span>
+                <span>{activity.is_archived ? 'Unarchive' : 'Archive'} Call</span>
               </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+
+      {isDisintegrating && (
+        <div className="absolute inset-0 overflow-hidden">
+          {particles.map(particle => (
+            <DisintegrationParticle
+              key={particle.id}
+              x={particle.x}
+              y={particle.y}
+            />
+          ))}
+        </div>
+      )}
+    </motion.div>
   );
 };
 

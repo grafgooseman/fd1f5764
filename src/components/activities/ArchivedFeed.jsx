@@ -1,21 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useActivities } from '../../context/ActivityContext';
 import ActivityCard from './ActivityCard';
 import { ChevronUp } from 'react-feather';
 
-const ActivityFeed = ({ showAll = false }) => {
-  const { activities, loading, error, fetchActivities } = useActivities();
+const ArchivedFeed = () => {
+  const { activities, loading, error } = useActivities();
   const [unStackedGroups, setUnStackedGroups] = useState(new Set());
-
-  useEffect(() => {
-    fetchActivities();
-  }, [fetchActivities]);
-
-  // Reset unstacked groups when activities change
-  useEffect(() => {
-    setUnStackedGroups(new Set());
-  }, [activities]);
 
   const groupCallsByTimeAndNumber = (activities) => {
     if (!Array.isArray(activities) || activities.length === 0) {
@@ -31,7 +22,7 @@ const ActivityFeed = ({ showAll = false }) => {
     let currentGroup = [];
 
     sortedActivities.forEach((activity) => {
-      if (!showAll && activity.is_archived) return;
+      if (!activity.is_archived) return; // Only show archived calls
 
       if (currentGroup.length === 0) {
         currentGroup.push(activity);
@@ -39,12 +30,11 @@ const ActivityFeed = ({ showAll = false }) => {
         const lastCall = currentGroup[currentGroup.length - 1];
         const timeDiff = Math.abs(
           new Date(lastCall.created_at) - new Date(activity.created_at)
-        ) / (1000 * 60); // Convert to minutes
+        ) / (1000 * 60);
 
         if (
           timeDiff <= 20 && 
-          lastCall.from === activity.from &&
-          !lastCall.is_archived
+          lastCall.from === activity.from
         ) {
           currentGroup.push(activity);
         } else {
@@ -129,7 +119,7 @@ const ActivityFeed = ({ showAll = false }) => {
               if (isUnstacked) {
                 return (
                   <motion.div key={groupKey} className="relative">
-                    <div className="absolute left-5 top-0 bottom-0 w-1 bg-primary-100">
+                    <div className="absolute left-8 top-0 bottom-0 w-1 bg-primary-100">
                       <button 
                         onClick={() => handleRestack(groupKey)}
                         className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-white border-2 border-primary-100 hover:border-primary-300 hover:bg-primary-50 transition-colors flex items-center justify-center shadow-sm"
@@ -138,7 +128,7 @@ const ActivityFeed = ({ showAll = false }) => {
                         <ChevronUp className="w-4 h-4 text-primary-500" />
                       </button>
                     </div>
-                    <div className="pl-9">
+                    <div className="pl-16">
                       {group.map((call, callIndex) => (
                         <motion.div
                           key={call.id}
@@ -187,11 +177,11 @@ const ActivityFeed = ({ showAll = false }) => {
       </AnimatePresence>
       {sortedDates.length === 0 && (
         <div className="text-center py-10 text-gray-500">
-          No calls to display
+          No archived calls to display
         </div>
       )}
     </div>
   );
 };
 
-export default ActivityFeed; 
+export default ArchivedFeed; 

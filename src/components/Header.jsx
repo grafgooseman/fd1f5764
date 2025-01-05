@@ -1,13 +1,24 @@
 import React from 'react';
 import { PhoneIcon } from '@heroicons/react/24/solid';
 
-const Header = () => {
+const Header = ({ currentView }) => {
+  const getTitle = () => {
+    switch (currentView) {
+      case 'archive':
+        return 'Archived';
+      case 'all':
+        return 'All Calls';
+      default:
+        return 'Activity';
+    }
+  };
+
   return (
     <header className="bg-white border-b border-gray-100 px-4 py-4 sticky top-0 z-10">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <PhoneIcon className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-semibold text-secondary">Activity</h1>
+          <h1 className="text-xl font-semibold text-secondary">{getTitle()}</h1>
         </div>
         <span className="text-sm text-gray-500">
           {new Date().toLocaleDateString('en-US', { 

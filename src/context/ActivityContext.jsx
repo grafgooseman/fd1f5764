@@ -1,61 +1,132 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, useState } from 'react';
 
-const ActivityContext = createContext();
+export const ActivityContext = createContext();
 
-const initialState = {
-  activities: [],
-  loading: false,
-  error: null,
-};
-
-function activityReducer(state, action) {
-  switch (action.type) {
-    case 'FETCH_START':
-      return { ...state, loading: true };
-    case 'FETCH_SUCCESS':
-      return { ...state, loading: false, activities: action.payload };
-    case 'FETCH_ERROR':
-      return { ...state, loading: false, error: action.payload };
-    case 'TOGGLE_ARCHIVE':
-      return {
-        ...state,
-        activities: state.activities.map(activity =>
-          activity.id === action.payload
-            ? { ...activity, is_archived: !activity.is_archived }
-            : activity
-        ),
-      };
-    default:
-      return state;
-  }
-}
-
-export function ActivityProvider({ children }) {
-  const [state, dispatch] = useReducer(activityReducer, initialState);
+export const ActivityProvider = ({ children }) => {
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchActivities = useCallback(async () => {
-    dispatch({ type: 'FETCH_START' });
     try {
+      setLoading(true);
       const response = await fetch('https://aircall-api.onrender.com/activities');
       const data = await response.json();
-      dispatch({ type: 'FETCH_SUCCESS', payload: data });
-    } catch (error) {
-      dispatch({ type: 'FETCH_ERROR', payload: error.message });
+      setActivities(data);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch activities');
+    } finally {
+      setLoading(false);
     }
   }, []);
 
-  const value = {
-    ...state,
-    fetchActivities,
-    dispatch,
+  const archiveCall = async (callId) => {
+    try {
+      const response = await fetch(`https://aircall-api.onrender.com/activities/${callId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ is_archived: true }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to archive call');
+      
+      // Update local state
+      setActivities(prevActivities => 
+        prevActivities.map(activity => 
+          activity.id === callId 
+            ? { ...activity, is_archived: true }
+            : activity
+        )
+      );
+    } catch (err) {
+      setError('Failed to archive call');
+    }
+  };
+
+  const unarchiveCall = async (callId) => {
+    try {
+      const response = await fetch(`https://aircall-api.onrender.com/activities/${callId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ is_archived: false }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to unarchive call');
+      
+      // Update local state
+      setActivities(prevActivities => 
+        prevActivities.map(activity => 
+          activity.id === callId 
+            ? { ...activity, is_archived: false }
+            : activity
+        )
+      );
+    } catch (err) {
+      setError('Failed to unarchive call');
+    }
+  };
+
+  const archiveAllCalls = async () => {
+    try {
+      // Update all non-archived calls
+      const promises = activities
+        .filter(activity => !activity.is_archived)
+        .map(activity => 
+          fetch(`https://aircall-api.onrender.com/activities/${activity.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ is_archived: true }),
+          })
+        );
+
+      await Promise.all(promises);
+      
+      // Update local state
+      setActivities(prevActivities => 
+        prevActivities.map(activity => ({ ...activity, is_archived: true }))
+      );
+    } catch (err) {
+      setError('Failed to archive all calls');
+    }
+  };
+
+  const resetAllCalls = async () => {
+    try {
+      const response = await fetch('https://aircall-api.onrender.com/reset', {
+        method: 'PATCH',
+      });
+      
+      if (!response.ok) throw new Error('Failed to reset calls');
+      
+      // Refresh activities after reset
+      await fetchActivities();
+    } catch (err) {
+      setError('Failed to reset calls');
+    }
   };
 
   return (
-    <ActivityContext.Provider value={value}>
+    <ActivityContext.Provider value={{
+      activities,
+      loading,
+      error,
+      fetchActivities,
+      archiveCall,
+      unarchiveCall,
+      archiveAllCalls,
+      resetAllCalls,
+    }}>
       {children}
     </ActivityContext.Provider>
   );
-}
+};
 
 export const useActivities = () => {
   const context = useContext(ActivityContext);
