@@ -43,10 +43,20 @@ A sophisticated call management application built with React that provides a mod
   - Numbers 0-9
   - * and # keys
   - Call and delete buttons
+- **Interactive Sound Effects:**
+  - Unique DTMF tones for each number key
+  - Tones play while button is pressed
+  - Tones stop immediately on button release
+  - Realistic phone ringing sound during call simulation
+- **Call Animation:**
+  - Button turns red during active call
+  - Pulsing phone icon animation
+  - 5-second simulated call duration
+  - Automatic call termination
 - **Input Display:**
   - Clear number display
-  - Backspace functionality
-  - Call initiation button
+  - Silent backspace functionality
+  - Call initiation button with state-based colors
 
 ### 4. Profile Section
 - **Personal Information Display:**
