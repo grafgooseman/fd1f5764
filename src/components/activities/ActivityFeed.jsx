@@ -2,10 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useActivities } from '../../context/ActivityContext';
 import ActivityCard from './ActivityCard';
-import { ChevronUp } from 'react-feather';
+import { ChevronUp, Archive, RefreshCw } from 'react-feather';
 
 const ActivityFeed = ({ feedType }) => {
-  const { activities, loading, error, fetchActivities } = useActivities();
+  const { 
+    activities, 
+    loading, 
+    error, 
+    fetchActivities, 
+    archiveAllCalls, 
+    resetAllCalls 
+  } = useActivities();
   const [unStackedGroups, setUnStackedGroups] = useState(new Set());
 
   useEffect(() => {
@@ -89,6 +96,29 @@ const ActivityFeed = ({ feedType }) => {
     });
   };
 
+  const renderActionButton = () => {
+    if (feedType === 'all') return null;
+
+    return (
+      <button
+        onClick={feedType === 'calls' ? archiveAllCalls : resetAllCalls}
+        className="w-full flex items-center justify-center space-x-2 px-4 py-2 mb-4 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-sm"
+      >
+        {feedType === 'calls' ? (
+          <>
+            <Archive className="w-4 h-4" />
+            <span>Archive All Calls</span>
+          </>
+        ) : (
+          <>
+            <RefreshCw className="w-4 h-4" />
+            <span>Unarchive All Calls</span>
+          </>
+        )}
+      </button>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -113,6 +143,9 @@ const ActivityFeed = ({ feedType }) => {
 
   return (
     <div className="divide-y divide-gray-100">
+      <div className="px-4 pt-4">
+        {renderActionButton()}
+      </div>
       <AnimatePresence>
         {sortedDates.map((date) => (
           <motion.div
@@ -153,6 +186,7 @@ const ActivityFeed = ({ feedType }) => {
                             isGrouped={false}
                             isFirst={groupIndex === 0 && callIndex === 0}
                             isLast={groupIndex === groupedByDate[date].length - 1 && callIndex === group.length - 1}
+                            feedType={feedType}
                           />
                         </motion.div>
                       ))}
@@ -180,6 +214,7 @@ const ActivityFeed = ({ feedType }) => {
                       setUnStackedGroups(prev => new Set([...prev, groupKey]));
                     }}
                     groupKey={groupKey}
+                    feedType={feedType}
                   />
                 </motion.div>
               );

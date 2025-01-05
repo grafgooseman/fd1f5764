@@ -25,7 +25,8 @@ const ActivityCard = ({
   isLast, 
   groupSize, 
   onUnstack,
-  groupKey 
+  groupKey,
+  feedType 
 }) => {
   const { archiveCall, unarchiveCall } = useActivities();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -207,14 +208,16 @@ const ActivityCard = ({
                 </div>
               )}
 
-              {/* Archive button */}
-              <button 
-                onClick={handleArchiveAction}
-                className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              >
-                <Archive className="w-4 h-4" />
-                <span>{activity.is_archived ? 'Unarchive' : 'Archive'} Call</span>
-              </button>
+              {/* Archive button - only show if not in 'all' view */}
+              {feedType !== 'all' && (
+                <button 
+                  onClick={handleArchiveAction}
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                >
+                  <Archive className="w-4 h-4" />
+                  <span>{activity.is_archived ? 'Unarchive' : 'Archive'} Call</span>
+                </button>
+              )}
             </div>
           </motion.div>
         )}
