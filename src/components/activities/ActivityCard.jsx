@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PhoneIncoming, PhoneOutgoing, PhoneMissed, Archive } from 'react-feather';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useActivities } from '../../context/ActivityContext';
-
-const ANIMATION_DURATION = 0.5; // Define duration in seconds
+import { ANIMATION_DURATION } from '../../constants/animations';
 
 const DisintegrationParticle = ({ x, y }) => (
   <motion.div
@@ -32,6 +31,7 @@ const ActivityCard = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDisintegrating, setIsDisintegrating] = useState(false);
   const [particles, setParticles] = useState([]);
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const createParticles = () => {
     const numParticles = 50;
@@ -92,26 +92,37 @@ const ActivityCard = ({
     }
   };
 
-  const handleArchiveAction = (e) => {
+  const handleArchiveAction = async (e) => {
     e.stopPropagation();
-    setIsExpanded(false);
     setIsDisintegrating(true);
     createParticles();
+
+    // Wait for particle animation
+    await new Promise(resolve => setTimeout(resolve, ANIMATION_DURATION * 1000));
     
-    // Call appropriate function based on current archive status
+    setIsRemoving(true);
+    
+    // Perform the archive/unarchive action
     if (activity.is_archived) {
-      unarchiveCall(activity.id);
+      await unarchiveCall(activity.id);
     } else {
-      archiveCall(activity.id);
+      await archiveCall(activity.id);
     }
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="relative"
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: ANIMATION_DURATION }}
+      animate={{ 
+        opacity: isRemoving ? 0 : 1,
+        height: isRemoving ? 0 : 'auto'
+      }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ 
+        duration: ANIMATION_DURATION,
+        height: { duration: ANIMATION_DURATION * 0.5 }
+      }}
     >
       <motion.div
         animate={{
@@ -162,7 +173,7 @@ const ActivityCard = ({
       </motion.div>
 
       <AnimatePresence>
-        {!isGrouped && isExpanded && (
+        {!isGrouped && isExpanded && !isDisintegrating && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -224,7 +235,15 @@ const ActivityCard = ({
       </AnimatePresence>
 
       {isDisintegrating && (
-        <div className="absolute inset-0 overflow-hidden">
+        <motion.div 
+          className="absolute inset-0 overflow-hidden"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 0 }}
+          transition={{ 
+            duration: ANIMATION_DURATION,
+            height: { duration: ANIMATION_DURATION * 0.5 }
+          }}
+        >
           {particles.map(particle => (
             <DisintegrationParticle
               key={particle.id}
@@ -232,7 +251,7 @@ const ActivityCard = ({
               y={particle.y}
             />
           ))}
-        </div>
+        </motion.div>
       )}
     </motion.div>
   );

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useActivities } from '../../context/ActivityContext';
 import ActivityCard from './ActivityCard';
 import { ChevronUp, Archive, RefreshCw } from 'react-feather';
+import { ANIMATION_DURATION } from '../../constants/animations';
 
 const ActivityFeed = ({ feedType }) => {
   const { 
@@ -146,24 +147,26 @@ const ActivityFeed = ({ feedType }) => {
       <div className="px-4 pt-4">
         {renderActionButton()}
       </div>
-      <AnimatePresence>
-        {sortedDates.map((date) => (
-          <motion.div
-            key={date}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div className="bg-gray-50 px-4 py-2 text-xs text-gray-500 uppercase tracking-wider">
-              {date}
-            </div>
+      {sortedDates.map((date) => (
+        <div key={date}>
+          <div className="bg-gray-50 px-4 py-2 text-xs text-gray-500 uppercase tracking-wider">
+            {date}
+          </div>
+          <AnimatePresence mode="popLayout">
             {groupedByDate[date].map((group, groupIndex) => {
               const groupKey = `${date}-${groupIndex}`;
               const isUnstacked = unStackedGroups.has(groupKey);
 
               if (isUnstacked) {
                 return (
-                  <motion.div key={groupKey} className="relative">
+                  <motion.div 
+                    key={groupKey} 
+                    className="relative"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    layout
+                  >
                     <div className="absolute left-5 top-0 bottom-0 w-1 bg-primary-100">
                       <button 
                         onClick={() => handleRestack(groupKey)}
@@ -198,10 +201,13 @@ const ActivityFeed = ({ feedType }) => {
               return (
                 <motion.div
                   key={groupKey}
-                  layout
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                  exit={{ 
+                    opacity: 0,
+                    transition: { duration: ANIMATION_DURATION }
+                  }}
+                  layout
                 >
                   <ActivityCard 
                     activity={group[0]}
@@ -219,9 +225,9 @@ const ActivityFeed = ({ feedType }) => {
                 </motion.div>
               );
             })}
-          </motion.div>
-        ))}
-      </AnimatePresence>
+          </AnimatePresence>
+        </div>
+      ))}
       {sortedDates.length === 0 && (
         <div className="text-center py-10 text-gray-500">
           {feedType === 'archive' 
