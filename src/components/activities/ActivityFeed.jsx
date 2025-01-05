@@ -174,82 +174,66 @@ const ActivityFeed = ({ feedType }) => {
           <div className="bg-gray-50 px-4 py-2 text-xs text-gray-500 uppercase tracking-wider">
             {date}
           </div>
-          <AnimatePresence mode="popLayout">
-            {groupedByDate[date].map((group, groupIndex) => {
-              const groupKey = `${date}-${group.id}`;
-              const isUnstacked = unStackedGroups.has(groupKey);
+          {groupedByDate[date].map((group, groupIndex) => {
+            const groupKey = `${date}-${group.id}`;
+            const isUnstacked = unStackedGroups.has(groupKey);
 
-              if (isUnstacked) {
-                return (
-                  <motion.div 
-                    key={groupKey}
-                    className="relative"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    layout
-                  >
-                    <div className="absolute left-5 top-0 bottom-0 w-1 bg-primary-100">
-                      <button 
-                        onClick={() => handleRestack(groupKey)}
-                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-white border-2 border-primary-100 hover:border-primary-300 hover:bg-primary-50 transition-colors flex items-center justify-center shadow-sm"
-                        title="Combine calls"
-                      >
-                        <ChevronUp className="w-4 h-4 text-primary-500" />
-                      </button>
-                    </div>
-                    <div className="pl-9">
-                      {group.calls.map((call, callIndex) => (
-                        <motion.div
-                          key={`${groupKey}-${call.id}`}
-                          layout
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                        >
-                          <ActivityCard 
-                            activity={call}
-                            isGrouped={false}
-                            isFirst={groupIndex === 0 && callIndex === 0}
-                            isLast={groupIndex === groupedByDate[date].length - 1 && callIndex === group.calls.length - 1}
-                            feedType={feedType}
-                            groupId={group.id}
-                          />
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.div>
-                );
-              }
-
+            if (isUnstacked) {
               return (
-                <motion.div
+                <div 
                   key={groupKey}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ 
-                    opacity: 0,
-                    transition: { duration: ANIMATION_DURATION }
-                  }}
-                  layout
+                  className="relative"
                 >
-                  <ActivityCard 
-                    activity={group.calls[0]}
-                    isGrouped={group.calls.length > 1}
-                    isFirst={groupIndex === 0}
-                    isLast={groupIndex === groupedByDate[date].length - 1}
-                    groupSize={group.calls.length}
-                    group={group.calls}
-                    onUnstack={() => {
-                      setUnStackedGroups(prev => new Set([...prev, groupKey]));
-                    }}
-                    groupKey={groupKey}
-                    groupId={group.id}
-                    feedType={feedType}
-                  />
-                </motion.div>
+                  <div className="absolute left-5 top-0 bottom-0 w-1 bg-primary-100">
+                    <button 
+                      onClick={() => handleRestack(groupKey)}
+                      className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-white border-2 border-primary-100 hover:border-primary-300 hover:bg-primary-50 transition-colors flex items-center justify-center shadow-sm"
+                      title="Combine calls"
+                    >
+                      <ChevronUp className="w-4 h-4 text-primary-500" />
+                    </button>
+                  </div>
+                  <div className="pl-9">
+                    {group.calls.map((call, callIndex) => (
+                      <div
+                        key={`${groupKey}-${call.id}`}
+                      >
+                        <ActivityCard 
+                          activity={call}
+                          isGrouped={false}
+                          isFirst={groupIndex === 0 && callIndex === 0}
+                          isLast={groupIndex === groupedByDate[date].length - 1 && callIndex === group.calls.length - 1}
+                          feedType={feedType}
+                          groupId={group.id}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               );
-            })}
-          </AnimatePresence>
+            }
+
+            return (
+              <div
+                key={groupKey}
+              >
+                <ActivityCard 
+                  activity={group.calls[0]}
+                  isGrouped={group.calls.length > 1}
+                  isFirst={groupIndex === 0}
+                  isLast={groupIndex === groupedByDate[date].length - 1}
+                  groupSize={group.calls.length}
+                  group={group.calls}
+                  onUnstack={() => {
+                    setUnStackedGroups(prev => new Set([...prev, groupKey]));
+                  }}
+                  groupKey={groupKey}
+                  groupId={group.id}
+                  feedType={feedType}
+                />
+              </div>
+            );
+          })}
         </div>
       ))}
       {sortedDates.length === 0 && (
