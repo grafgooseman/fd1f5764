@@ -2,7 +2,15 @@ import React, { useState } from 'react';
 import { PhoneIncoming, PhoneOutgoing, PhoneMissed, Archive } from 'react-feather';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const ActivityCard = ({ activity, isGrouped, isFirst, isLast, groupSize, group = [] }) => {
+const ActivityCard = ({ 
+  activity, 
+  isGrouped, 
+  isFirst, 
+  isLast, 
+  groupSize, 
+  onUnstack,
+  groupKey 
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const getCallIcon = (callType, direction) => {
@@ -34,16 +42,24 @@ const ActivityCard = ({ activity, isGrouped, isFirst, isLast, groupSize, group =
     return `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`;
   };
 
+  const handleClick = () => {
+    if (isGrouped) {
+      onUnstack(groupKey);
+    } else {
+      setIsExpanded(!isExpanded);
+    }
+  };
+
   return (
     <div className="relative">
       <div 
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={handleClick}
         className={`
           bg-white p-4 border-b border-gray-100 
           hover:bg-gray-50 transition-all duration-200 ease-in-out cursor-pointer
           ${isExpanded ? 'bg-gray-50' : ''}
           ${isFirst ? 'rounded-t-lg' : ''}
-          ${isLast && !isExpanded ? 'rounded-b-lg border-b-0' : ''}
+          ${isLast ? 'rounded-b-lg border-b-0' : ''}
         `}
       >
         <div className="flex items-center space-x-4">
@@ -77,7 +93,7 @@ const ActivityCard = ({ activity, isGrouped, isFirst, isLast, groupSize, group =
       </div>
 
       <AnimatePresence>
-        {isExpanded && (
+        {!isGrouped && isExpanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
