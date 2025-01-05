@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Header from './components/Header';
 import Navigation from './components/Navigation';
 import ActivityFeed from './components/activities/ActivityFeed';
-import ArchivedFeed from './components/activities/ArchivedFeed';
 import { ActivityProvider } from './context/ActivityContext';
 
 console.log('App component loaded');
