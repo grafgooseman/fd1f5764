@@ -6,7 +6,7 @@ import { ANIMATION_DURATION } from '../../constants/animations';
 
 const DisintegrationParticle = ({ x, y }) => (
   <motion.div
-    className="absolute w-1 h-1 bg-gray-400 rounded-full"
+    className="absolute w-1 h-1 bg-theme-light-text-tertiary dark:bg-theme-dark-text-tertiary rounded-full"
     initial={{ x, y, opacity: 1 }}
     animate={{
       x: x + (Math.random() - 0.5) * 100,
@@ -168,9 +168,11 @@ const ActivityCard = ({
         <div 
           onClick={handleClick}
           className={`
-            bg-white p-4 border-b border-gray-100 
-            hover:bg-gray-50 transition-all duration-200 ease-in-out cursor-pointer
-            ${isExpanded ? 'bg-gray-50' : ''}
+            bg-theme-light-bg-primary dark:bg-theme-dark-bg-primary p-4 
+            border-b border-theme-light-border-primary dark:border-theme-dark-border-primary 
+            hover:bg-theme-light-bg-secondary dark:hover:bg-theme-dark-bg-secondary 
+            transition-all duration-200 ease-in-out cursor-pointer
+            ${isExpanded ? 'bg-theme-light-bg-secondary dark:bg-theme-dark-bg-secondary' : ''}
             ${isFirst ? 'rounded-t-lg' : ''}
             ${isLast ? 'rounded-b-lg border-b-0' : ''}
           `}
@@ -181,7 +183,7 @@ const ActivityCard = ({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-2">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-theme-light-text-primary dark:text-theme-dark-text-primary truncate">
                   {activity.from || 'Unknown'}
                   {isGrouped && groupSize > 1 && (
                     <span className="ml-2 inline-flex items-center justify-center bg-red-500 rounded-full w-4 h-4 text-[10px] font-medium text-white">
@@ -190,15 +192,15 @@ const ActivityCard = ({
                   )}
                 </p>
               </div>
-              <p className="text-sm text-gray-500 truncate">
+              <p className="text-sm text-theme-light-text-secondary dark:text-theme-dark-text-secondary truncate">
                 via {activity.via}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-theme-light-text-secondary dark:text-theme-dark-text-secondary">
                 {formatTime(activity.created_at)}
               </p>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-theme-light-text-tertiary dark:text-theme-dark-text-tertiary">
                 {formatDuration(activity.duration)}
               </p>
             </div>
@@ -213,51 +215,57 @@ const ActivityCard = ({
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="border-b border-gray-100 bg-gray-50"
+            className="border-b border-theme-light-border-primary dark:border-theme-dark-border-primary bg-theme-light-bg-secondary dark:bg-theme-dark-bg-secondary"
           >
             <div className="p-4 space-y-4">
-              {/* Details for the main call */}
               <div className="space-y-2">
-                <h3 className="text-sm font-medium text-gray-900">Call Details</h3>
+                <h3 className="text-sm font-medium text-theme-light-text-primary dark:text-theme-dark-text-primary">
+                  Call Details
+                </h3>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <p className="text-gray-500">Date:</p>
-                  <p className="text-gray-900">{formatDate(activity.created_at)}</p>
-                  <p className="text-gray-500">Time:</p>
-                  <p className="text-gray-900">{formatTime(activity.created_at)}</p>
-                  <p className="text-gray-500">Duration:</p>
-                  <p className="text-gray-900">{formatDuration(activity.duration)}</p>
-                  <p className="text-gray-500">Direction:</p>
-                  <p className="text-gray-900 capitalize">{activity.direction}</p>
-                  <p className="text-gray-500">Via:</p>
-                  <p className="text-gray-900">{activity.via}</p>
+                  <p className="text-theme-light-text-secondary dark:text-theme-dark-text-secondary">Date:</p>
+                  <p className="text-theme-light-text-primary dark:text-theme-dark-text-primary">{formatDate(activity.created_at)}</p>
+                  <p className="text-theme-light-text-secondary dark:text-theme-dark-text-secondary">Time:</p>
+                  <p className="text-theme-light-text-primary dark:text-theme-dark-text-primary">{formatTime(activity.created_at)}</p>
+                  <p className="text-theme-light-text-secondary dark:text-theme-dark-text-secondary">Duration:</p>
+                  <p className="text-theme-light-text-primary dark:text-theme-dark-text-primary">{formatDuration(activity.duration)}</p>
+                  <p className="text-theme-light-text-secondary dark:text-theme-dark-text-secondary">Direction:</p>
+                  <p className="text-theme-light-text-primary dark:text-theme-dark-text-primary capitalize">{activity.direction}</p>
+                  <p className="text-theme-light-text-secondary dark:text-theme-dark-text-secondary">Via:</p>
+                  <p className="text-theme-light-text-primary dark:text-theme-dark-text-primary">{activity.via}</p>
                 </div>
               </div>
 
-              {/* Show grouped calls if any */}
               {isGrouped && group.length > 1 && (
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-gray-900">Related Calls</h3>
+                  <h3 className="text-sm font-medium text-theme-light-text-primary dark:text-theme-dark-text-primary">
+                    Related Calls
+                  </h3>
                   <div className="space-y-2">
                     {group.slice(1).map((call) => (
-                      <div key={call.id} className="flex justify-between text-sm border-t border-gray-100 pt-2">
+                      <div key={call.id} className="flex justify-between text-sm border-t border-theme-light-border-primary dark:border-theme-dark-border-primary pt-2">
                         <div className="flex items-center space-x-2">
                           <div className="flex-shrink-0">
                             {getCallIcon(call.call_type, call.direction)}
                           </div>
-                          <span className="text-gray-900">{formatTime(call.created_at)}</span>
+                          <span className="text-theme-light-text-primary dark:text-theme-dark-text-primary">{formatTime(call.created_at)}</span>
                         </div>
-                        <span className="text-gray-500">{formatDuration(call.duration)}</span>
+                        <span className="text-theme-light-text-secondary dark:text-theme-dark-text-secondary">{formatDuration(call.duration)}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Archive button - only show if not in 'all' view */}
               {feedType !== 'all' && (
                 <button 
                   onClick={handleArchiveAction}
-                  className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-sm font-medium 
+                    text-theme-light-text-primary dark:text-theme-dark-text-primary 
+                    bg-theme-light-bg-primary dark:bg-theme-dark-bg-primary 
+                    border border-theme-light-border-secondary dark:border-theme-dark-border-secondary 
+                    rounded-md hover:bg-theme-light-bg-secondary dark:hover:bg-theme-dark-bg-secondary 
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                 >
                   <Archive className="w-4 h-4" />
                   <span>{activity.is_archived ? 'Unarchive' : 'Archive'} Call</span>

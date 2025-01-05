@@ -125,29 +125,6 @@ const ActivityFeed = ({ feedType }) => {
     });
   };
 
-  const renderActionButton = () => {
-    if (feedType === 'all') return null;
-
-    return (
-      <button
-        onClick={feedType === 'calls' ? archiveAllCalls : resetAllCalls}
-        className="w-full flex items-center justify-center space-x-2 px-4 py-2 mb-4 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-sm"
-      >
-        {feedType === 'calls' ? (
-          <>
-            <Archive className="w-4 h-4" />
-            <span>Archive All Calls</span>
-          </>
-        ) : (
-          <>
-            <RefreshCw className="w-4 h-4" />
-            <span>Unarchive All Calls</span>
-          </>
-        )}
-      </button>
-    );
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -165,13 +142,33 @@ const ActivityFeed = ({ feedType }) => {
   }
 
   return (
-    <div className="divide-y divide-gray-100">
+    <div className="divide-y divide-theme-light-border-primary dark:divide-theme-dark-border-primary">
       <div className="px-4 pt-4">
-        {renderActionButton()}
+        <button
+          onClick={feedType === 'calls' ? archiveAllCalls : resetAllCalls}
+          className="w-full flex items-center justify-center space-x-2 px-4 py-2 mb-4 text-sm font-medium 
+            text-theme-light-text-primary dark:text-theme-dark-text-primary 
+            bg-theme-light-bg-primary dark:bg-theme-dark-bg-primary 
+            border border-theme-light-border-secondary dark:border-theme-dark-border-secondary 
+            rounded-md hover:bg-theme-light-bg-secondary dark:hover:bg-theme-dark-bg-secondary 
+            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-sm"
+          >
+            {feedType === 'calls' ? (
+              <>
+                <Archive className="w-4 h-4" />
+                <span>Archive All Calls</span>
+              </>
+            ) : (
+              <>
+                <RefreshCw className="w-4 h-4" />
+                <span>Unarchive All Calls</span>
+              </>
+            )}
+          </button>
       </div>
       {sortedDates.map((date) => (
         <div key={date}>
-          <div className="bg-gray-50 px-4 py-2 text-xs text-gray-500 uppercase tracking-wider">
+          <div className="bg-theme-light-bg-secondary dark:bg-theme-dark-bg-secondary px-4 py-2 text-xs text-theme-light-text-tertiary dark:text-theme-dark-text-tertiary uppercase tracking-wider">
             {date}
           </div>
           {groupedByDate[date].map((group, groupIndex) => {
@@ -237,7 +234,7 @@ const ActivityFeed = ({ feedType }) => {
         </div>
       ))}
       {sortedDates.length === 0 && (
-        <div className="text-center py-10 text-gray-500">
+        <div className="text-center py-10 text-theme-light-text-secondary dark:text-theme-dark-text-secondary">
           {feedType === 'archive' 
             ? 'No archived calls to display' 
             : feedType === 'all'
