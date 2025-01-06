@@ -1,73 +1,151 @@
-## Summary
+# AirCall - Call Activity Manager - Frontend Dev Challenge
 
-The goal of this test is to make you code a small ReactJS app. We have prepared a skeleton app for you, but feel free to change anything (CSS files, HTML structure, JS structure, etc) to suit your needs.
+## Overview
+A sophisticated call management application built with React that provides a modern, intuitive interface for handling phone calls, contacts, and communications. The application features a dark/light theme system, smooth animations, and comprehensive call management capabilities.
 
-The app should have the following features:
-- **Activity Feed** - simple list of calls
-- **Activity Detail** - detail of a call
-- **Archive** - the final user should be able to archive (and unarchive) a call. Archived calls will no longer be displayed on the Activity Feed and should have a separate Archived Tab.
-- A button to archive all calls in the activity feed
-- A button to unarchive all calls in the archived calls tab
+## Features
 
-Show us what you can do in 48 hours. You will be assessed on the following parameters: 
-- Focus on design sense (Pay attention to the UI/UX and transitions)
-- React Best Practices
-- Code Readability and Maintainability
+### 1. Navigation System
+- **Five Main Sections:**
+  - Inbox (Active Calls)
+  - All Calls History
+  - Dialer
+  - Archive
+  - Profile
+- **Distinctive Dialer Button:** Centered in the navigation bar with a unique circular design and hover effects
 
-## Submission Requirements
-After you're done with the assignment, please submit a link to the **GitHub/Bitbucket repository** (make sure it's public) with your code **AND** a deployment link where our recruiters can interact with the live version. You can use freely available tools like **Netlify, Vercel, Render, etc** to deploy your React application.
+### 2. Call Management
 
-Your repository name should be the first 8 digits of a UUID. A random UUID can be generated from any site like this one: https://www.uuidgenerator.net/version4. This is to prevent malicious actors from plagiarizing your submission by searching for it on GitHub, since your repository is public.
+#### Activity Feed
+- **Grouped Calls:** Automatically groups related calls (same number within 20 minutes)
+- **Call Information Display:**
+  - Call direction (incoming/outgoing)
+  - Duration
+  - Timestamp
+  - Contact information
+  - Call status (missed, completed)
+- **Visual Indicators:**
+  - Color-coded icons (red for missed calls, blue for outgoing, green for incoming)
+  - Group size indicators for stacked calls
 
-For example: Your respository name here will be `036b1c95` and the repository URL that you submit will look like: `https://github.com/<your-username>/036b1c95`
-<img width="782" alt="Screenshot 2024-01-10 at 10 07 47 PM" src="https://github.com/speer-technologies/aircall/assets/66385959/64fd4b89-e288-4e31-ad62-0949a686088a">
+#### Archive System
+- **Archive Management:**
+  - Individual call archiving
+  - Bulk archive functionality
+  - Archive/Unarchive all calls
+  - Swipe-to-archive gesture
+- **Archive Views:**
+  - Separate archived calls section
+  - Toggle between active and archived calls
 
-Once done, the assessment (along with other details) must be submitted on the following Google Form and NOT via email: https://forms.gle/itbJiaZ1TjToL45D8
+### 3. Dialer Interface
+- **Full Numeric Keypad:**
+  - Numbers 0-9
+  - * and # keys
+  - Call and delete buttons
+- **Interactive Sound Effects:**
+  - Unique DTMF tones for each number key
+  - Tones play while button is pressed
+  - Tones stop immediately on button release
+  - Realistic phone ringing sound during call simulation
+- **Call Animation:**
+  - Button turns red during active call
+  - Pulsing phone icon animation
+  - 5-second simulated call duration
+  - Automatic call termination
+- **Input Display:**
+  - Clear number display
+  - Silent backspace functionality
+  - Call initiation button with state-based colors
 
-**Note:** Submissions that fail to comply with any of the above submission requirements will be removed from any further consideration.
+### 4. Profile Section
+- **Personal Information Display:**
+  - Profile picture
+  - Name and title
+  - Email contact
+- **Social Links:**
+  - GitHub profile
+  - LinkedIn profile
+  - Personal website
+- **Professional Presentation:**
+  - Clean layout
+  - Direct links to professional profiles
+  - Consistent theme integration
 
-To give you an example/reference, here's what the app could look like:
+### 5. UI/UX Features
 
+#### Theme System
+- **Dual Theme Support:**
+  - Light mode
+  - Dark mode
+- **Theme Toggle:** Accessible from header
+- **Consistent Styling:** Theme-aware components and transitions
 
-![app](https://user-images.githubusercontent.com/630714/29357034-763d7216-8276-11e7-8bcb-e77d9645dfcc.png)
+#### Animations
+- **Interaction Feedback:**
+  - Smooth hover effects
+  - Click animations
+  - Transition effects
+- **Call Card Animations:**
+  - Swipe-to-archive with visual feedback
+  - Expand/collapse animations for call details
+  - Particle effect during call archiving
+- **Navigation Transitions:**
+  - Smooth view changes
+  - Active state indicators
+  - Hover effects on interactive elements
 
-## Installation
+#### Responsive Design
+- **Optimized Layout:**
+  - Mobile-first design
+  - Contained width for larger screens
+  - Consistent spacing and alignment
+- **Accessibility:**
+  - Clear visual hierarchy
+  - Readable typography
+  - Sufficient contrast ratios
 
-We're using [yarn](https://yarnpkg.com) here (but you can use npm):
+### 6. Technical Implementation
 
-```
-yarn install
-yarn start
-```
+#### State Management
+- React Context for global state
+- Local state for component-specific data
+- Efficient state updates and re-renders
 
-**Note**: Please make sure to run the app in Node 16.
+#### API Integration
+- RESTful API consumption
+- Real-time data updates
+- Error handling and loading states
 
-## API documentation
+#### Performance
+- Optimized re-renders
+- Efficient data grouping
+- Smooth animations without performance impact
 
-### Routes
+## Technical Stack
+- **Frontend Framework:** React
+- **Animation Library:** Framer Motion
+- **Icons:** Heroicons, Feather Icons
+- **Styling:** Tailwind CSS
+- **State Management:** React Context
+- **HTTP Client:** Fetch API
 
-Here is the base URL of the API: [https://aircall-api.onrender.com](https://aircall-api.onrender.com/) <br>
+## User Experience
+The application provides a seamless experience with:
+- Intuitive navigation
+- Responsive interactions
+- Clear visual feedback
+- Smooth transitions
+- Consistent theme application
+- Efficient call management
+- Professional presentation
 
-The API is hosted on a free server, which is why the first time you call the API it might throw an error. The server goes to sleep if there hasn't been any activity for a while, but after 30-60 seconds of making the first call, it should work as expected. Please reach out to us in case it doesn't.
+## Performance Considerations
+- Optimized bundle size
+- Efficient state updates
+- Smooth animations
+- Responsive interface
+- Error boundary implementation
+- Loading state management
 
-- **GET** - BASE_URL/activities: get calls to display in the Activity Feed
-- **GET** - BASE_URL/activities/<call_id> retrieve a specific call details
-- **PATCH** - BASE_URL/activities/<call_id> update a call. The only field updatable is `is_archived (bool)`. You'll need to send a JSON in the request body:
-```
-{
-  is_archived: true
-}
-```
-- **PATCH** - BASE_URL/reset: Reset all calls to initial state (usefull if you archived all calls).
-
-### Call object
-
-- **id** - unique ID of call
-- **created_at** - creation date
-- **direction** - `inbound` or `outbound` call
-- **from** - caller's number
-- **to** - callee's number
-- **via** - Aircall number used for the call
-- **duration** - duration of a call (in seconds)
-- **is_archived** - call is archived or not
-- **call_type** - can be a `missed`, `answered` or `voicemail` call.
+This application represents a modern approach to call management with a focus on user experience, performance, and functionality. It combines practical utility with aesthetic design to create a professional and efficient communication tool.
